@@ -486,7 +486,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('software-projects.create') }}" class="{{ request()->routeIs('software-projects.create') ? 'active' : '' }}">
+                <a href="{{ route('software-projects.welcome') }}" class="{{ request()->routeIs('software-projects.welcome') || request()->routeIs('software-projects.create') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i> New Request
                 </a>
             </li>

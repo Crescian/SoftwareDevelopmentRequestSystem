@@ -10,6 +10,7 @@ use App\Http\Controllers\FeasibilityAssessmentController;
 use App\Http\Controllers\InitialReviewController;
 use App\Http\Controllers\ManagementApprovalController;
 use App\Http\Controllers\MonitoringController;
+use App\Http\Controllers\OrgDirectoryController;
 use App\Http\Controllers\ProjectCollaborationController;
 use App\Http\Controllers\RequirementsDesignController;
 use App\Http\Controllers\SoftwareProjectController;
@@ -40,6 +41,19 @@ Route::middleware('auth')->group(function () {
         '/projects',
         [SoftwareProjectController::class, 'index']
     )->name('software-projects.index');
+
+    Route::get(
+        '/requests/new',
+        [SoftwareProjectController::class, 'welcome']
+    )->name('software-projects.welcome');
+
+    Route::prefix('org')
+        ->name('org.')
+        ->group(function () {
+            Route::get('/business-units', [OrgDirectoryController::class, 'businessUnits'])->name('business-units');
+            Route::get('/companies', [OrgDirectoryController::class, 'companies'])->name('companies');
+            Route::get('/departments', [OrgDirectoryController::class, 'departments'])->name('departments');
+        });
 
     Route::get(
         '/projects/create',

@@ -233,7 +233,7 @@
             <h1 class="page-title">{{ $user->name }}!</h1>
             <p class="page-sub">Have an idea or a system you need? Submit a request and let's build it together.</p>
         </div>
-        <a href="{{ route('software-projects.create') }}" class="btn-navy">
+        <a href="{{ route('software-projects.welcome') }}" class="btn-navy">
             <i class="bi bi-plus-lg"></i> New Request
         </a>
     </div>
@@ -295,7 +295,7 @@
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
                 You haven't submitted any requests yet.
-                <a href="{{ route('software-projects.create') }}" class="fw-bold ms-1">Create your first request</a>
+                <a href="{{ route('software-projects.welcome') }}" class="fw-bold ms-1">Create your first request</a>
             </div>
         @else
             <div class="table-responsive">
@@ -336,7 +336,7 @@
                 <div>
                     <h3>Need a new system?</h3>
                     <p>Submit a software development request.</p>
-                    <a href="{{ route('software-projects.create') }}" class="btn-navy" style="padding:8px 16px;font-size:13px">
+                    <a href="{{ route('software-projects.welcome') }}" class="btn-navy" style="padding:8px 16px;font-size:13px">
                         <i class="bi bi-plus-lg"></i> New Request
                     </a>
                 </div>

@@ -23,20 +23,25 @@ class SoftwareProjectController extends Controller
     ) {
     }
 
+    public function welcome(): View
+    {
+        return view('software-projects.welcome');
+    }
+
     public function create(): View
     {
-        $departments = Department::where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
         $people = User::where('active', true)
             ->orderBy('name')
             ->get(['id', 'name', 'department']);
 
+        $oldDepartmentId = old('requesting_department_id');
+
         return view('software-projects.create', [
-            'departments' => $departments,
             'people' => $people,
             'nextProjectId' => $this->nextProjectId(),
+            'oldDepartment' => $oldDepartmentId
+                ? Department::with('company')->find($oldDepartmentId)
+                : null,
         ]);
     }
 
@@ -88,6 +93,9 @@ class SoftwareProjectController extends Controller
     {
         $project = SoftwareProject::with([
             'requestingDepartment',
+            'requestor',
+            'projectSponsor',
+            'projectManager',
             'objectives',
             'scopes',
             'requirements',

@@ -51,6 +51,12 @@ return [
         'base_url' => env('TICKETING_API_URL'),
         'client' => env('TICKETING_API_CLIENT', 'software-development-request'),
         'timeout' => env('TICKETING_API_TIMEOUT', 10),
+
+        // Static bearer token for the read-only org directory endpoints
+        // (/org/business-units, /org/companies, /org/departments). Issued
+        // on the ticketing system itself via `api:issue-org-token <name>` —
+        // not a per-user login token.
+        'org_token' => env('TICKETING_ORG_API_TOKEN'),
     ],
 
 ];

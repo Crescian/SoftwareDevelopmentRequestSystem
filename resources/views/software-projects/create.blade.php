@@ -387,7 +387,7 @@
 
     <div class="wizard-head">
         <div>
-            <a href="{{ route('dashboard') }}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back</a>
+            <a href="{{ url()->previous(route('software-projects.welcome')) }}" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back</a>
             <h1 class="page-title">New Software Project Request</h1>
             <p class="page-sub">Please fill out the details below. All fields are required unless indicated.</p>
         </div>
@@ -461,17 +461,31 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="f-label" for="requesting_department_id">Requesting Department <span class="req">*</span></label>
-                        <select id="requesting_department_id" name="requesting_department_id"
-                            class="f-select @error('requesting_department_id') is-invalid @enderror" required>
-                            <option value="">Select Department</option>
-                            @foreach ($departments as $department)
-                                <option value="{{ $department->id }}" @selected(old('requesting_department_id') == $department->id)>
-                                    {{ $department->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="col-md-12" id="orgDirectoryField"
+                        data-old-business-unit-id="{{ $oldDepartment?->business_unit_id }}"
+                        data-old-company-id="{{ $oldDepartment?->company_id }}"
+                        data-old-department-id="{{ $oldDepartment?->id }}">
+                        <label class="f-label">Requesting Department <span class="req">*</span></label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <select id="requesting_business_unit_id" class="f-select" data-org-level="business-unit">
+                                    <option value="">Select Business Unit</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="requesting_company_id" class="f-select" data-org-level="company" disabled>
+                                    <option value="">Select Company</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="requesting_department_id" name="requesting_department_id"
+                                    class="f-select @error('requesting_department_id') is-invalid @enderror"
+                                    data-org-level="department" disabled required>
+                                    <option value="">Select Department</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="f-hint" id="orgDirectoryHint">Pick the business unit and company first to narrow the department list.</div>
                     </div>
 
                     <div class="col-md-6">
@@ -936,6 +950,129 @@
     }
 
     show(1);
+})();
+</script>
+<script>
+(function () {
+    const field = document.getElementById('orgDirectoryField');
+    const buSelect = document.getElementById('requesting_business_unit_id');
+    const companySelect = document.getElementById('requesting_company_id');
+    const deptSelect = document.getElementById('requesting_department_id');
+    const hint = document.getElementById('orgDirectoryHint');
+
+    const oldBuId = field.dataset.oldBusinessUnitId || '';
+    const oldCompanyId = field.dataset.oldCompanyId || '';
+    const oldDeptId = field.dataset.oldDepartmentId || '';
+
+    function resetSelect(select, placeholder) {
+        select.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = placeholder;
+        select.appendChild(opt);
+    }
+
+    function fillSelect(select, items, selectedId) {
+        items.forEach(function (item) {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            if (item.id === selectedId) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function setHint(message, isError) {
+        hint.textContent = message;
+        hint.classList.toggle('text-danger', !!isError);
+    }
+
+    function loadBusinessUnits(selectedId) {
+        resetSelect(buSelect, 'Select Business Unit');
+        buSelect.disabled = true;
+
+        fetch('{{ route('org.business-units') }}', { headers: { Accept: 'application/json' } })
+            .then(function (res) {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(function (items) {
+                fillSelect(buSelect, items, selectedId);
+                buSelect.disabled = false;
+                setHint('Pick the business unit and company first to narrow the department list.', false);
+
+                if (selectedId) loadCompanies(selectedId, oldCompanyId);
+            })
+            .catch(function () {
+                setHint('Could not load business units from the directory. Please try again.', true);
+            });
+    }
+
+    function loadCompanies(businessUnitId, selectedId) {
+        resetSelect(companySelect, 'Select Company');
+        resetSelect(deptSelect, 'Select Department');
+        companySelect.disabled = true;
+        deptSelect.disabled = true;
+
+        if (!businessUnitId) return;
+
+        companySelect.innerHTML = '<option value="">Loading…</option>';
+
+        fetch('{{ route('org.companies') }}?business_unit_id=' + encodeURIComponent(businessUnitId), {
+            headers: { Accept: 'application/json' },
+        })
+            .then(function (res) {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(function (items) {
+                resetSelect(companySelect, 'Select Company');
+                fillSelect(companySelect, items, selectedId);
+                companySelect.disabled = false;
+
+                if (selectedId) loadDepartments(selectedId, oldDeptId);
+            })
+            .catch(function () {
+                resetSelect(companySelect, 'Select Company');
+                setHint('Could not load companies from the directory. Please try again.', true);
+            });
+    }
+
+    function loadDepartments(companyId, selectedId) {
+        resetSelect(deptSelect, 'Select Department');
+        deptSelect.disabled = true;
+
+        if (!companyId) return;
+
+        deptSelect.innerHTML = '<option value="">Loading…</option>';
+
+        fetch('{{ route('org.departments') }}?company_id=' + encodeURIComponent(companyId), {
+            headers: { Accept: 'application/json' },
+        })
+            .then(function (res) {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(function (items) {
+                resetSelect(deptSelect, 'Select Department');
+                fillSelect(deptSelect, items, selectedId);
+                deptSelect.disabled = false;
+            })
+            .catch(function () {
+                resetSelect(deptSelect, 'Select Department');
+                setHint('Could not load departments from the directory. Please try again.', true);
+            });
+    }
+
+    buSelect.addEventListener('change', function () {
+        loadCompanies(buSelect.value, '');
+    });
+
+    companySelect.addEventListener('change', function () {
+        loadDepartments(companySelect.value, '');
+    });
+
+    loadBusinessUnits(oldBuId);
 })();
 </script>
 @endsection

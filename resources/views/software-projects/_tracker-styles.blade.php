@@ -20,16 +20,50 @@
     color: var(--nd);
 }
 
-/* ── Clean table (Requirements / Required Attachments) ── */
+/* ── Section card header (Project Information tab) ── */
+.card-header-clean {
+    background: #fff;
+    border-bottom: 2px solid var(--acd);
+    padding: 14px 20px;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .2px;
+    color: var(--nd);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header-clean i {
+    color: var(--acd);
+    font-size: 13px;
+}
+
+/* ── Clean table (Requirements / Required Attachments) ──
+   Wrapper owns the frame (border + radius + clipping) since border-radius
+   on <table>/<th> itself is unreliable across browsers with collapsed
+   borders — the table stays a plain, borderless grid inside it. */
+.table-clean-wrap {
+    border: 1px solid var(--bd);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(11, 35, 64, .04);
+}
+
+.table-clean {
+    margin: 0;
+}
+
 .table-clean thead th {
+    background: var(--nd);
+    background-image: linear-gradient(135deg, var(--nd) 0%, var(--nm) 100%);
+    color: rgba(255, 255, 255, .92);
     font-size: 11px;
     font-weight: 700;
-    color: var(--tm);
     text-transform: uppercase;
-    letter-spacing: .4px;
-    border-bottom: 1px solid var(--bd);
-    padding: 12px 18px;
-    background: #fafbfd;
+    letter-spacing: .6px;
+    padding: 14px 18px;
+    border: none;
     white-space: nowrap;
 }
 
@@ -37,10 +71,19 @@
     padding: 14px 18px;
     vertical-align: middle;
     border-bottom: 1px solid #eef1f5;
+    background: #fff;
 }
 
 .table-clean tbody tr:last-child td {
     border-bottom: none;
+}
+
+.table-clean tbody tr {
+    transition: background-color .15s ease;
+}
+
+.table-clean tbody tr:hover td {
+    background: #f6fafe;
 }
 
 .table-clean .ref {
@@ -301,6 +344,29 @@
     font-size: 13px;
     color: var(--tm);
     white-space: nowrap;
+    text-align: right;
+}
+
+.activity-time .activity-time-abs {
+    display: block;
+    font-weight: 700;
+    color: var(--nd);
+}
+
+.activity-time .activity-time-rel {
+    display: block;
+    font-size: 11.5px;
+    color: var(--tm);
+}
+
+.activity-duration {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--tm);
+    font-style: italic;
+    margin-bottom: 6px;
 }
 
 .activity-actor {
@@ -311,6 +377,12 @@
     font-weight: 700;
     color: var(--nd);
     margin-bottom: 6px;
+}
+
+.activity-actor .actor-dept {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tm);
 }
 
 .activity-actor .avatar-sm {

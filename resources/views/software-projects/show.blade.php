@@ -207,7 +207,18 @@
 
                         <div class="activity-head">
                             <span class="activity-transition" style="font-weight:800;color:var(--nd);">Request Created</span>
-                            <span class="activity-time">{{ $project->created_at->diffForHumans() }}</span>
+                            <span class="activity-time">
+                                <span class="activity-time-abs">{{ $project->created_at->format('M j, Y g:ia') }}</span>
+                                <span class="activity-time-rel">{{ $project->created_at->diffForHumans() }}</span>
+                            </span>
+                        </div>
+
+                        <div class="activity-actor">
+                            <span class="avatar-sm">{{ $initials($project->requestor->name ?? null) }}</span>
+                            {{ $project->requestor->name ?? 'Unknown' }}
+                            @if ($project->requestor?->department)
+                                <span class="actor-dept">&middot; {{ $project->requestor->department }}</span>
+                            @endif
                         </div>
 
                     </div>
@@ -234,6 +245,12 @@
                             'success' => 'fa-solid fa-rocket',
                             default => 'fa-solid fa-arrow-right',
                         };
+
+                        $previousAt = $loop->first ? $project->created_at : $project->statusHistories[$loop->index - 1]->changed_at;
+                        $fromLabel = $history->from_status ? \App\Enums\ProjectStatus::from($history->from_status)->label() : 'Draft';
+                        $duration = ($previousAt && $history->changed_at)
+                            ? $previousAt->diffForHumans($history->changed_at, ['syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE])
+                            : null;
                     @endphp
 
                     <div class="activity-item">
@@ -257,14 +274,24 @@
                                 </span>
 
                                 <span class="activity-time">
-                                    {{ $history->changed_at?->diffForHumans() }}
+                                    <span class="activity-time-abs">{{ $history->changed_at?->format('M j, Y g:ia') }}</span>
+                                    <span class="activity-time-rel">{{ $history->changed_at?->diffForHumans() }}</span>
                                 </span>
 
                             </div>
 
+                            @if ($duration)
+                                <div class="activity-duration">
+                                    <i class="fa-solid fa-hourglass-half"></i> Spent {{ $duration }} in {{ $fromLabel }}
+                                </div>
+                            @endif
+
                             <div class="activity-actor">
                                 <span class="avatar-sm">{{ $initials($history->changedBy->name ?? null) }}</span>
                                 {{ $history->changedBy->name ?? 'Unknown' }}
+                                @if ($history->changedBy?->department)
+                                    <span class="actor-dept">&middot; {{ $history->changedBy->department }}</span>
+                                @endif
                             </div>
 
                             @if ($history->remarks)
@@ -293,8 +320,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Project Information
+            <div class="card-header-clean">
+                <i class="fa-solid fa-circle-info"></i> Project Information
             </div>
 
             <div class="card-body">
@@ -340,8 +367,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Project Overview
+            <div class="card-header-clean">
+                <i class="fa-solid fa-file-lines"></i> Project Overview
             </div>
 
             <div class="card-body">
@@ -379,8 +406,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Objectives
+            <div class="card-header-clean">
+                <i class="fa-solid fa-bullseye"></i> Objectives
             </div>
 
             <div class="card-body">
@@ -406,8 +433,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Scope
+            <div class="card-header-clean">
+                <i class="fa-solid fa-layer-group"></i> Scope
             </div>
 
             <div class="card-body">
@@ -460,8 +487,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Requirements
+            <div class="card-header-clean">
+                <i class="fa-solid fa-list-check"></i> Requirements
             </div>
 
             <div class="card-body">
@@ -475,7 +502,7 @@
                     };
                 @endphp
 
-                <div class="table-responsive">
+                <div class="table-responsive table-clean-wrap">
 
                     <table class="table table-clean mb-0">
 
@@ -551,11 +578,13 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Required Attachments
+            <div class="card-header-clean">
+                <i class="fa-solid fa-paperclip"></i> Required Attachments
             </div>
 
             <div class="card-body">
+
+                <div class="table-responsive table-clean-wrap">
 
                 <table class="table table-clean mb-0">
 
@@ -620,6 +649,8 @@
 
                 </table>
 
+                </div>
+
             </div>
 
         </div>
@@ -629,8 +660,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Documents
+            <div class="card-header-clean">
+                <i class="fa-solid fa-folder-open"></i> Documents
             </div>
 
             <div class="card-body">
@@ -710,8 +741,8 @@
 
         <div class="card mb-4">
 
-            <div class="card-header fw-bold">
-                Comments
+            <div class="card-header-clean">
+                <i class="fa-solid fa-comments"></i> Comments
             </div>
 
             <div class="card-body">

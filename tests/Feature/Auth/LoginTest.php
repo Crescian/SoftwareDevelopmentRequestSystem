@@ -35,7 +35,7 @@ class LoginTest extends TestCase
             'password' => 'secret',
         ]);
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('software-projects.welcome'));
         $this->assertAuthenticated();
 
         $user = User::find('11111111-1111-1111-1111-111111111111');

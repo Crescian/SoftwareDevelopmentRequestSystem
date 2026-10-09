@@ -26,7 +26,7 @@
                 My Requests
             </h1>
 
-            <a href="{{ route('software-projects.create') }}" class="btn btn-primary">
+            <a href="{{ route('software-projects.welcome') }}" class="btn btn-primary">
                 New Request
             </a>
 

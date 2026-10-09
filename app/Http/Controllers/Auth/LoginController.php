@@ -48,7 +48,7 @@ class LoginController extends Controller
             'email' => $user->email,
         ]);
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('software-projects.welcome'));
     }
 
     public function destroy(Request $request): RedirectResponse
