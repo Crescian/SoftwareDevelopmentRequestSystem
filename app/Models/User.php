@@ -62,6 +62,17 @@ class User extends Authenticatable
         return $this->dashboard_role ?? DashboardRole::Requestor;
     }
 
+    /**
+     * The route name for this user's "home" — Requestors have no dashboard,
+     * so My Requests is home for them; every other role keeps the Dashboard.
+     */
+    public function homeRoute(): string
+    {
+        return $this->effectiveDashboardRole() === DashboardRole::Requestor
+            ? 'software-projects.index'
+            : 'dashboard';
+    }
+
     public function managedProjects(): HasMany
     {
         return $this->hasMany(SoftwareProject::class, 'project_manager_id');

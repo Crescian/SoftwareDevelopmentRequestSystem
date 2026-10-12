@@ -470,24 +470,26 @@
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <aside class="sidebar" id="sidebar">
-        <a href="{{ route('dashboard') }}" class="sidebar-brand">
+        <a href="{{ route($authUser?->homeRoute() ?? 'dashboard') }}" class="sidebar-brand">
             Software Development<br>Request <span>System</span>
         </a>
 
         <ul class="sidebar-nav">
             <li>
-                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i> Dashboard
+                <a href="{{ route('software-projects.welcome') }}" class="{{ request()->routeIs('software-projects.welcome') || request()->routeIs('software-projects.create') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-plus"></i> New Request
                 </a>
             </li>
+            @unless ($authUser?->effectiveDashboardRole() === \App\Enums\DashboardRole::Requestor)
+                <li>
+                    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-grid-1x2"></i> Dashboard
+                    </a>
+                </li>
+            @endunless
             <li>
                 <a href="{{ route('software-projects.index') }}" class="{{ request()->routeIs('software-projects.index') || (request()->routeIs('software-projects.show') && isset($project) && $project->requestor_id === $authUser?->id) ? 'active' : '' }}">
                     <i class="bi bi-journal-text"></i> My Requests
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('software-projects.welcome') }}" class="{{ request()->routeIs('software-projects.welcome') || request()->routeIs('software-projects.create') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-plus"></i> New Request
                 </a>
             </li>
         </ul>

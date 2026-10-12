@@ -26,7 +26,7 @@ class NavigationTest extends TestCase
     {
         $requestor = User::factory()->create();
 
-        $response = $this->actingAs($requestor)->get(route('dashboard'));
+        $response = $this->actingAs($requestor)->get(route('software-projects.index'));
 
         $response->assertOk();
         $response->assertDontSee('Initial Review');
@@ -38,7 +38,16 @@ class NavigationTest extends TestCase
         $requestor = User::factory()->create();
 
         $this->actingAs($requestor)
-            ->get(route('dashboard'))
+            ->get(route('software-projects.index'))
             ->assertDontSee(route('approvals.management.index'), false);
+    }
+
+    public function test_requestor_does_not_see_a_dashboard_link(): void
+    {
+        $requestor = User::factory()->create();
+
+        $this->actingAs($requestor)
+            ->get(route('software-projects.index'))
+            ->assertDontSee('Dashboard');
     }
 }

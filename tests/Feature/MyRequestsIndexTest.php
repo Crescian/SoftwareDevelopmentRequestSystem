@@ -102,4 +102,33 @@ class MyRequestsIndexTest extends TestCase
         $response->assertOk();
         $response->assertSee('submitted any requests yet');
     }
+
+    public function test_default_requestor_sees_the_home_treatment(): void
+    {
+        $requestor = User::factory()->create(['name' => 'Nia Sanchez']);
+        $this->makeProject([
+            'requestor_id' => $requestor->id,
+            'project_sponsor_id' => $requestor->id,
+            'status' => 'SUBMITTED',
+        ]);
+
+        $response = $this->actingAs($requestor)->get(route('software-projects.index'));
+
+        $response->assertOk();
+        $response->assertSee('Nia Sanchez');
+        $response->assertSee('For Review');
+        $response->assertSee('Completed');
+        $response->assertDontSee('Back to Dashboard');
+    }
+
+    public function test_non_requestor_role_does_not_see_the_home_treatment_on_their_own_requests(): void
+    {
+        $mst = User::factory()->mst()->create();
+
+        $response = $this->actingAs($mst)->get(route('software-projects.index'));
+
+        $response->assertOk();
+        $response->assertSee('Back to Dashboard');
+        $response->assertDontSee('Needs Your Decision');
+    }
 }

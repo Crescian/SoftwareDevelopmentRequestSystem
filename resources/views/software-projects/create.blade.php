@@ -720,7 +720,7 @@
 
             {{-- ───────── FOOTER ───────── --}}
             <div class="wizard-footer">
-                <a href="{{ route('dashboard') }}" class="btn-outline-navy" id="btnCancel">Cancel</a>
+                <a href="{{ route(auth()->user()->homeRoute()) }}" class="btn-outline-navy" id="btnCancel">Cancel</a>
                 <div class="d-flex gap-2 right">
                     <button type="button" class="btn-outline-navy" id="btnPrev" style="display:none">
                         <i class="bi bi-arrow-left"></i> Previous

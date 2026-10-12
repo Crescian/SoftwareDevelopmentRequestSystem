@@ -4,6 +4,49 @@
 
 @section('styles')
 @include('software-projects._tracker-styles')
+
+    .stat-card {
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 100%;
+    }
+
+    .stat-card .num {
+        font-weight: 900;
+        font-size: 30px;
+        line-height: 1;
+        letter-spacing: -.5px;
+    }
+
+    .stat-card .label {
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .stat-card .hint {
+        font-size: 11px;
+        color: var(--tm);
+        margin-top: 2px;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.blue   { background: var(--acl); color: var(--nl); }
+    .stat-icon.amber  { background: #fff4d6; color: #d9880c; }
+    .stat-icon.red    { background: #fde8e8; color: #e5484d; }
+    .stat-icon.green  { background: #e3f7ea; color: #1b9a4b; }
 @endsection
 
 @section('content')
@@ -16,21 +59,90 @@
 
         @endif
 
-        <a href="{{ route('dashboard') }}" class="back-link">
-            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-        </a>
+        @if ($isHome)
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+            @php
+                $user = auth()->user();
+                $firstName = collect(explode(' ', trim($user->name ?? '')))->first() ?: 'there';
+                $hour = (int) now()->format('G');
+                $greeting = $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening');
+            @endphp
 
-            <h1 class="fw-bold mb-0">
-                My Requests
-            </h1>
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+                <div>
+                    <div class="page-eyebrow">{{ $greeting }},</div>
+                    <h1 class="page-title">{{ $user->name }}!</h1>
+                    <p class="page-sub">Have an idea or a system you need? Submit a request and let's build it together.</p>
+                </div>
+                <a href="{{ route('software-projects.welcome') }}" class="btn-navy">
+                    <i class="bi bi-plus-lg"></i> New Request
+                </a>
+            </div>
 
-            <a href="{{ route('software-projects.welcome') }}" class="btn btn-primary">
-                New Request
+            @include('dashboard._needs-your-decision')
+
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="card-soft stat-card">
+                        <div>
+                            <div class="num">{{ $stats['in_progress'] }}</div>
+                            <div class="label">My Requests</div>
+                            <div class="hint">In Progress</div>
+                        </div>
+                        <div class="stat-icon blue"><i class="bi bi-journal-text"></i></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card-soft stat-card">
+                        <div>
+                            <div class="num">{{ $stats['for_review'] }}</div>
+                            <div class="label">For Review</div>
+                            <div class="hint">Waiting for approval</div>
+                        </div>
+                        <div class="stat-icon amber"><i class="bi bi-hourglass-split"></i></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card-soft stat-card">
+                        <div>
+                            <div class="num">{{ $stats['for_clarification'] }}</div>
+                            <div class="label">For Clarification</div>
+                            <div class="hint">Action needed</div>
+                        </div>
+                        <div class="stat-icon red"><i class="bi bi-exclamation-circle"></i></div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="card-soft stat-card">
+                        <div>
+                            <div class="num">{{ $stats['completed'] }}</div>
+                            <div class="label">Completed</div>
+                            <div class="hint">Successfully delivered</div>
+                        </div>
+                        <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                    </div>
+                </div>
+            </div>
+
+        @else
+
+            <a href="{{ route('dashboard') }}" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
             </a>
 
-        </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <h1 class="fw-bold mb-0">
+                    My Requests
+                </h1>
+
+                <a href="{{ route('software-projects.welcome') }}" class="btn btn-primary">
+                    New Request
+                </a>
+
+            </div>
+
+        @endif
 
         @if ($projects->isEmpty())
 

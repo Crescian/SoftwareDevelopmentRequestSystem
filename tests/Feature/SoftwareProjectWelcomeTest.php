@@ -35,7 +35,7 @@ class SoftwareProjectWelcomeTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('dashboard'))
+            ->get(route('software-projects.index'))
             ->assertSee(route('software-projects.welcome'), false);
     }
 }

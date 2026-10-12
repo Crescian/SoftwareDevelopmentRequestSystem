@@ -28,13 +28,18 @@ enum DashboardRole: string
         };
     }
 
+    /**
+     * The view for each role's dashboard. Requestor has no dashboard —
+     * DashboardController redirects that role to "My Requests" before this
+     * is ever reached.
+     */
     public function dashboardView(): string
     {
         return match ($this) {
-            self::Requestor => 'dashboard.requestor',
             self::MstReviewer => 'dashboard.mst-reviewer',
             self::Developer, self::ProjectManager, self::Qa => 'dashboard.team',
             self::SystemAdministrator => 'dashboard.admin',
+            self::Requestor => throw new \LogicException('Requestor has no dashboard view; DashboardController redirects before calling this.'),
         };
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DashboardRole;
 use App\Enums\ProjectStatus;
 use App\Http\Requests\StoreSoftwareProjectRequest;
 use App\Models\Department;
 use App\Models\SoftwareProject;
 use App\Models\User;
+use App\Services\NeedsYourDecisionResolver;
 use App\Services\ProjectOwnerResolver;
 use App\Services\ProjectStatusService;
 use App\Services\SoftwareProjectService;
@@ -20,6 +22,7 @@ class SoftwareProjectController extends Controller
         protected SoftwareProjectService $projectService,
         protected ProjectStatusService $statusService,
         protected ProjectOwnerResolver $ownerResolver,
+        protected NeedsYourDecisionResolver $needsYourDecisionResolver,
     ) {
     }
 
@@ -78,15 +81,35 @@ class SoftwareProjectController extends Controller
 
     public function index(Request $request): View
     {
+        $user = $request->user();
+
         $projects = SoftwareProject::with(['requestor', 'projectSponsor', 'projectManager', 'requestingDepartment'])
-            ->where('requestor_id', $request->user()->id)
+            ->where('requestor_id', $user->id)
             ->latest('created_at')
             ->paginate(15);
 
-        return view('software-projects.index', [
+        $isHome = $user->effectiveDashboardRole() === DashboardRole::Requestor;
+
+        $data = [
             'projects' => $projects,
             'ownerResolver' => $this->ownerResolver,
-        ]);
+            'isHome' => $isHome,
+        ];
+
+        if ($isHome) {
+            $mine = SoftwareProject::where('requestor_id', $user->id);
+
+            $data['stats'] = [
+                'in_progress' => (clone $mine)->whereIn('status', DashboardController::STATUS_IN_PROGRESS)->count(),
+                'for_review' => (clone $mine)->whereIn('status', DashboardController::STATUS_FOR_REVIEW)->count(),
+                'for_clarification' => (clone $mine)->whereIn('status', DashboardController::STATUS_FOR_CLARIFICATION)->count(),
+                'completed' => (clone $mine)->whereIn('status', DashboardController::STATUS_COMPLETED)->count(),
+            ];
+
+            $data['needsYourDecision'] = $this->needsYourDecisionResolver->resolve($user);
+        }
+
+        return view('software-projects.index', $data);
     }
 
     public function show(string $softwareProject): View

@@ -42,14 +42,13 @@ class DashboardTest extends TestCase
         ], $overrides));
     }
 
-    public function test_default_requestor_gets_the_requestor_dashboard(): void
+    public function test_default_requestor_is_redirected_to_my_requests_instead_of_a_dashboard(): void
     {
         $requestor = User::factory()->create();
 
         $this->actingAs($requestor)
             ->get(route('dashboard'))
-            ->assertOk()
-            ->assertSee('My Recent Requests');
+            ->assertRedirect(route('software-projects.index'));
     }
 
     public function test_mst_reviewer_dashboard_shows_queue_counts_and_links(): void
@@ -212,7 +211,7 @@ class DashboardTest extends TestCase
         $sponsor = User::factory()->create();
         $project = $this->makeProject(['status' => 'PENDING_APPROVAL', 'project_sponsor_id' => $sponsor->id]);
 
-        $response = $this->actingAs($sponsor)->get(route('dashboard'));
+        $response = $this->actingAs($sponsor)->get(route('software-projects.index'));
 
         $response->assertOk();
         $response->assertSee('Needs Your Decision');
@@ -248,7 +247,7 @@ class DashboardTest extends TestCase
         $requestor = User::factory()->create();
         $project = $this->makeProject(['status' => 'USER_ACCEPTANCE_TESTING', 'requestor_id' => $requestor->id]);
 
-        $response = $this->actingAs($requestor)->get(route('dashboard'));
+        $response = $this->actingAs($requestor)->get(route('software-projects.index'));
 
         $response->assertOk();
         $response->assertSee('Needs Your Decision');
