@@ -11,6 +11,15 @@ class StoreSoftwareProjectRequest extends FormRequest
         return true;
     }
 
+    /**
+     * The requestor is always whoever is signed in — never trusted from
+     * the form, or anyone could file a request under someone else's name.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge(['requestor_id' => $this->user()?->id]);
+    }
+
     public function rules(): array
     {
         return [
@@ -42,14 +51,18 @@ class StoreSoftwareProjectRequest extends FormRequest
                 'uuid',
             ],
 
+            // Sponsor and PM must be real users: only they can act on
+            // Management Approval and Requirements & Design.
             'project_sponsor_id' => [
                 'required',
                 'uuid',
+                'exists:users,id',
             ],
 
             'project_manager_id' => [
                 'nullable',
                 'uuid',
+                'exists:users,id',
             ],
 
             /*

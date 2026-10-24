@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Department;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class DepartmentSeeder extends Seeder
 {
@@ -30,12 +29,10 @@ class DepartmentSeeder extends Seeder
         ];
 
         foreach ($departments as $department) {
-            Department::create([
-                'id' => Str::uuid(),
-                'code' => $department['code'],
-                'name' => $department['name'],
-                'is_active' => true,
-            ]);
+            Department::updateOrCreate(
+                ['code' => $department['code']],
+                ['name' => $department['name'], 'is_active' => true],
+            );
         }
     }
 }

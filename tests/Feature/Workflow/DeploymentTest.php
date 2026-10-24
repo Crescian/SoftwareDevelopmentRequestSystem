@@ -176,4 +176,78 @@ class DeploymentTest extends TestCase
         $this->assertSame('MONITORING_MAINTENANCE', $project->fresh()->status);
         $this->assertSame('COMPLETED', $deployment->fresh()->status);
     }
+
+    public function test_mst_can_add_release_note_but_requestor_cannot(): void
+    {
+        $requestor = User::factory()->create();
+        $mst = User::factory()->mst()->create();
+        $project = $this->projectAtDeployment($requestor);
+
+        $this->actingAs($mst)->post(route('workflow.deployment.deployments.store', $project), [
+            'deployment_number' => 'DEP-001',
+            'version' => '1.0.0',
+            'environment' => 'PRODUCTION',
+        ]);
+        $deployment = $project->fresh()->deployments->first();
+
+        $note = [
+            'document_number' => 'RN-001',
+            'title' => 'Initial release',
+            'version' => '1.0.0',
+            'new_features' => 'Expense submission',
+        ];
+
+        $this->actingAs($requestor)
+            ->post(route('workflow.deployment.release-notes.store', [$project, $deployment]), $note)
+            ->assertForbidden();
+
+        $this->actingAs($mst)
+            ->post(route('workflow.deployment.release-notes.store', [$project, $deployment]), $note)
+            ->assertRedirect();
+
+        $releaseNote = $deployment->releaseNotes()->sole();
+        $this->assertSame('RN-001', $releaseNote->document_number);
+        $this->assertSame($mst->id, $releaseNote->prepared_by);
+
+        // A double-submit is a validation error, not a 500.
+        $this->actingAs($mst)
+            ->post(route('workflow.deployment.release-notes.store', [$project, $deployment]), $note)
+            ->assertSessionHasErrors('document_number');
+        $this->assertSame(1, $deployment->releaseNotes()->count());
+    }
+
+    public function test_cannot_change_another_projects_deployment_through_this_project(): void
+    {
+        $requestor = User::factory()->create();
+        $mst = User::factory()->mst()->create();
+        $project = $this->projectAtDeployment($requestor);
+
+        $other = $project->replicate()->fill([
+            'id' => (string) Str::uuid(),
+            'project_id' => 'SDR-2026-999',
+            'status' => 'MONITORING_MAINTENANCE',
+        ]);
+        $other->save();
+        $otherDeployment = $other->deployments()->create([
+            'id' => (string) Str::uuid(),
+            'deployment_number' => 'DEP-OTHER',
+            'version' => '1.0.0',
+            'environment' => 'PRODUCTION',
+            'prepared_by' => $mst->id,
+        ]);
+
+        $this->actingAs($mst)
+            ->post(route('workflow.deployment.release-notes.store', [$project, $otherDeployment]), [
+                'document_number' => 'RN-001',
+                'title' => 'Sneaky',
+                'version' => '1.0.0',
+            ])
+            ->assertNotFound();
+
+        $this->actingAs($mst)
+            ->post(route('workflow.deployment.outcome', [$project, $otherDeployment]), ['outcome' => 'FAILED', 'remarks' => 'x'])
+            ->assertNotFound();
+
+        $this->assertSame(0, $otherDeployment->releaseNotes()->count());
+    }
 }

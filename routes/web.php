@@ -20,7 +20,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\WorkflowTrackerController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route(auth()->user()?->homeRoute() ?? 'login');
 });
 
 Route::middleware('guest')->group(function () {

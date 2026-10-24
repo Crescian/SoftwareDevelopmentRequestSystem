@@ -75,7 +75,7 @@ class SoftwareProjectController extends Controller
             ->route('software-projects.show', $project)
             ->with(
                 'success',
-                'Software Development Request created successfully.'
+                'Digital Solutions Request created successfully.'
             );
     }
 

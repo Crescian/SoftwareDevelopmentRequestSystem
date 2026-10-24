@@ -416,8 +416,6 @@
     <form method="POST" action="{{ route('software-projects.store') }}" id="sdrForm" novalidate>
         @csrf
 
-        <input type="hidden" name="requestor_id" value="{{ auth()->id() }}">
-
         <div class="card-soft wizard-card">
 
             {{-- ───────── STEP 1: PROJECT DETAILS ───────── --}}

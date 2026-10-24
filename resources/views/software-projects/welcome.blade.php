@@ -460,7 +460,7 @@
         <div class="welcome-inner">
 
             <div class="welcome-hero">
-                <div class="eyebrow"><i class="fa-solid fa-circle-info"></i> Software Development Request System</div>
+                <div class="eyebrow"><i class="fa-solid fa-circle-info"></i> {{ config('app.name') }}</div>
                 <h1>Let's get your request started</h1>
                 <p>Tell us what you need — choose a request type below and we'll guide you through the rest, step by step, from first review to go-live.</p>
 

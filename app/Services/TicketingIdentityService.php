@@ -91,19 +91,25 @@ class TicketingIdentityService
      */
     public function syncLocalUser(array $ticketingUser): User
     {
-        return User::updateOrCreate(
-            ['id' => $ticketingUser['id']],
-            [
-                'name' => $ticketingUser['name'],
-                'email' => $ticketingUser['email'],
-                'role_id' => $ticketingUser['role_id'] ?? null,
-                'role' => $ticketingUser['role'] ?? null,
-                'department_id' => $ticketingUser['department_id'] ?? null,
-                'department' => $ticketingUser['department'] ?? null,
-                'active' => $ticketingUser['active'] ?? true,
-                'last_synced_at' => now(),
-            ],
-        );
+        // Fall back to email for a pre-seeded row whose id doesn't match the
+        // ticketing id — keeping its local id so nothing that references it
+        // is orphaned, instead of failing on the unique email.
+        $user = User::find($ticketingUser['id'])
+            ?? User::where('email', $ticketingUser['email'])->first()
+            ?? new User(['id' => $ticketingUser['id']]);
+
+        $user->fill([
+            'name' => $ticketingUser['name'],
+            'email' => $ticketingUser['email'],
+            'role_id' => $ticketingUser['role_id'] ?? null,
+            'role' => $ticketingUser['role'] ?? null,
+            'department_id' => $ticketingUser['department_id'] ?? null,
+            'department' => $ticketingUser['department'] ?? null,
+            'active' => $ticketingUser['active'] ?? true,
+            'last_synced_at' => now(),
+        ])->save();
+
+        return $user;
     }
 
     private function client(): \Illuminate\Http\Client\PendingRequest

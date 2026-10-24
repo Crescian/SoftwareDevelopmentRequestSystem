@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sign In — Software Development Request System</title>
+    <title>Sign In — {{ config('app.name') }}</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -687,7 +687,7 @@
             <div class="deco-circle c2"></div>
             <div class="deco-circle c3"></div>
 
-            <a href="{{ url('/') }}" class="left-logo">Software Development<br>Request<span> System</span></a>
+            <a href="{{ url('/') }}" class="left-logo">Digital Solutions<br>Request<span> System</span></a>
 
             <div class="left-main">
                 <div class="left-eyebrow">
@@ -706,7 +706,7 @@
                         <div class="role-icon"><i class="bi bi-file-earmark-plus"></i></div>
                         <div>
                             <div class="role-title">Submit Requests</div>
-                            <div class="role-desc">Start a new software development request in minutes</div>
+                            <div class="role-desc">Start a new digital solution request in minutes</div>
                         </div>
                     </div>
                     <div class="role-card">
@@ -751,7 +751,7 @@
                 </div>
 
                 <div class="form-eyebrow">Welcome back</div>
-                <h2 class="form-title">Sign in to<br><em>Software Development Request System</em></h2>
+                <h2 class="form-title">Sign in to<br><em>{{ config('app.name') }}</em></h2>
                 <p class="form-sub">
                     Use your company email and password. You'll be redirected to your role's dashboard automatically.
                 </p>
@@ -840,7 +840,7 @@
 
             </div>
 
-            <div class="right-footer">Software Development Request System &nbsp;·&nbsp; Secure internal access</div>
+            <div class="right-footer">{{ config('app.name') }} &nbsp;·&nbsp; Secure internal access</div>
         </div>
 
     </div>

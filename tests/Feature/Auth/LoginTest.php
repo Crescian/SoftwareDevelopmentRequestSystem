@@ -45,6 +45,35 @@ class LoginTest extends TestCase
         $this->assertSame('fake-token-123', session('ticketing_token'));
     }
 
+    public function test_login_reuses_a_pre_seeded_row_matched_by_email_when_its_id_differs(): void
+    {
+        $seeded = User::factory()->systemAdministrator()->create([
+            'id' => '99999999-9999-9999-9999-999999999999',
+            'email' => 'jane@example.com',
+        ]);
+
+        Http::fake([
+            '*/login' => Http::response([
+                'access_token' => 'fake-token-123',
+                'user' => [
+                    'id' => '11111111-1111-1111-1111-111111111111',
+                    'name' => 'Jane Doe',
+                    'email' => 'jane@example.com',
+                    'department' => 'IT',
+                    'active' => true,
+                ],
+            ], 200),
+        ]);
+
+        $this->post('/login', ['email' => 'jane@example.com', 'password' => 'secret'])
+            ->assertRedirect(route('software-projects.welcome'));
+
+        $this->assertAuthenticatedAs($seeded->fresh());
+        $this->assertSame(1, User::count());
+        $this->assertSame('Jane Doe', $seeded->fresh()->name);
+        $this->assertSame('system_administrator', $seeded->fresh()->dashboard_role->value);
+    }
+
     public function test_invalid_credentials_are_rejected(): void
     {
         Http::fake([

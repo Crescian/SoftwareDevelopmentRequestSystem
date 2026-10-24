@@ -97,6 +97,7 @@ class DeploymentController extends Controller
         Deployment $deployment
     ): RedirectResponse {
         $this->authorize('manageDeployment', $softwareProject);
+        $this->ensureDeploymentBelongsTo($deployment, $softwareProject);
 
         $validated = $request->validate([
             'category' => ['required', 'string', 'max:50'],
@@ -126,6 +127,7 @@ class DeploymentController extends Controller
         DeploymentChecklist $deploymentChecklist
     ): RedirectResponse {
         $this->authorize('manageDeployment', $softwareProject);
+        $this->ensureDeploymentBelongsTo($deploymentChecklist->deployment, $softwareProject);
 
         $validated = $request->validate([
             'status' => ['required', Rule::in(['DONE', 'FAILED', 'N_A'])],
@@ -150,9 +152,15 @@ class DeploymentController extends Controller
         Deployment $deployment
     ): RedirectResponse {
         $this->authorize('manageDeployment', $softwareProject);
+        $this->ensureDeploymentBelongsTo($deployment, $softwareProject);
 
         $validated = $request->validate([
-            'document_number' => ['required', 'string', 'max:50'],
+            'document_number' => [
+                'required', 'string', 'max:50',
+                Rule::unique('release_notes')
+                    ->where('deployment_id', $deployment->id)
+                    ->where('version', $request->input('version')),
+            ],
             'title' => ['required', 'string', 'max:255'],
             'version' => ['required', 'string', 'max:50'],
             'release_summary' => ['nullable', 'string', 'max:4000'],
@@ -234,6 +242,7 @@ class DeploymentController extends Controller
         Deployment $deployment
     ): RedirectResponse {
         $this->authorize('manageDeployment', $softwareProject);
+        $this->ensureDeploymentBelongsTo($deployment, $softwareProject);
 
         $validated = $request->validate([
             'outcome' => ['required', Rule::in(['SUCCESSFUL', 'FAILED'])],
@@ -292,5 +301,15 @@ class DeploymentController extends Controller
         return redirect()
             ->route('workflow.deployment.show', $softwareProject)
             ->with('success', $message);
+    }
+
+    /**
+     * Route-model binding resolves {deployment} on its own, so without this
+     * a deployment from another project could be edited through a project
+     * the user is allowed to manage.
+     */
+    private function ensureDeploymentBelongsTo(Deployment $deployment, SoftwareProject $softwareProject): void
+    {
+        abort_unless($deployment->software_project_id === $softwareProject->id, 404);
     }
 }
